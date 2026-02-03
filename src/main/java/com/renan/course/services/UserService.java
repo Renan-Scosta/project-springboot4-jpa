@@ -4,6 +4,7 @@ import com.renan.course.entities.User;
 import com.renan.course.repositories.UserRepository;
 import com.renan.course.services.exceptions.DataBaseException;
 import com.renan.course.services.exceptions.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -47,9 +48,13 @@ public class UserService {
 
     @Transactional
     public User  update(Long id, User obj) {
-        User entity = userRepository.getReferenceById(id);
-        updateData(entity, obj);
-        return userRepository.save(entity);
+       try {
+            User entity = userRepository.getReferenceById(id);
+            updateData(entity, obj);
+            return userRepository.save(entity);
+       }catch (EntityNotFoundException e) {
+           throw new ResourceNotFoundException(id);
+       }
     }
 
     private void updateData(User entity, User obj) {
